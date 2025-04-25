@@ -81,10 +81,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 加载模型
+# ✅ 加载处理好的 pipeline 模型
 @st.cache_resource
 def load_model():
-    return joblib.load("HGB.pkl")
+    return joblib.load("HGB_clean.pkl")
 
 model = load_model()
 
@@ -99,16 +99,16 @@ with col1:
     st.markdown('<div class="section-title">🧪 Synthesis Conditions</div>', unsafe_allow_html=True)
     T_H = st.number_input("Hydrothermal Temperature (°C)", min_value=80.0, max_value=300.0, value=180.0, step=1.0)
     time = st.number_input("Reaction Time (h)", min_value=0.5, max_value=48.0, value=6.0, step=0.5)
-    ratio = st.number_input("Solid-to-liquid Ratio (g/mL)", min_value=0.01, max_value=1.0, value=0.1, step=0.01)
     modified = st.selectbox("Surface Modification?", ["No", "Yes"])
     modified_val = 1 if modified == "Yes" else 0
+    ratio = st.number_input("Solid-to-liquid Ratio (g/mL)", min_value=0.01, max_value=1.0, value=0.1, step=0.01)
 
 with col2:
     st.markdown('<div class="section-title">🧬 Material Properties</div>', unsafe_allow_html=True)
     C = st.number_input("Carbon Content (wt%)", min_value=10.0, max_value=90.0, value=60.0, step=0.5)
-    ONC = st.number_input("Molar Ratio (O+N)/C", min_value=0.01, max_value=2.0, value=0.5, step=0.01)
     HC = st.number_input("Molar Ratio H/C", min_value=0.01, max_value=2.0, value=0.3, step=0.01)
     OC = st.number_input("Molar Ratio O/C", min_value=0.01, max_value=2.0, value=0.2, step=0.01)
+    ONC = st.number_input("Molar Ratio (O+N)/C", min_value=0.01, max_value=2.0, value=0.5, step=0.01)
     BET = st.number_input("BET Surface Area (m²/g)", min_value=5.0, max_value=2000.0, value=400.0, step=10.0)
 
 with col3:
@@ -125,14 +125,16 @@ col_btn, col_download = st.columns([1.5, 1])
 
 with col_btn:
     if st.button("🔍 Predict Adsorption Capacity"):
-        input_array = np.array([[T_H, time, ratio, modified_val, C, ONC, HC, OC, BET, pH, T, C0]])
+        input_array = np.array([[T_H, time, modified_val, ratio, C, HC, OC, ONC, BET, pH, T, C0]])
         prediction = model.predict(input_array)[0]
         st.success(f"✅ Predicted Adsorption Capacity: **{prediction:.3f} mmol/g**")
 
         df_result = pd.DataFrame([{
-            "T_H (°C)": T_H, "Time (h)": time, "S/L Ratio": ratio, "Modified": modified,
-            "C (wt%)": C, "(O+N)/C": ONC, "H/C": HC, "O/C": OC, "BET (m²/g)": BET,
-            "pH": pH, "T (°C)": T, "C₀ (mg/g)": C0, "Predicted Q (mmol/g)": round(prediction, 3)
+            "T_H (°C)": T_H, "Time (h)": time, "Modified": modified,
+            "S/L Ratio (g/mL)": ratio, "C (wt%)": C,
+            "H/C": HC, "O/C": OC, "(O+N)/C": ONC, "BET (m²/g)": BET,
+            "pH": pH, "T (°C)": T, "C₀ (mg/g)": C0,
+            "Predicted Q (mmol/g)": round(prediction, 3)
         }])
 
 with col_download:
