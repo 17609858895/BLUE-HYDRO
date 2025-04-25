@@ -4,67 +4,78 @@ import pandas as pd
 import joblib
 from io import BytesIO
 
-# 页面配置：设成宽屏
+# 页面配置：居中显示、模拟A4横向布局
 st.set_page_config(
     page_title="Methylene Blue Adsorption Predictor",
-    layout="wide"
+    layout="centered"
 )
 
-# 🌿 样式设置
+# 🌿 自定义样式优化
 st.markdown("""
     <style>
     .stApp {
+        max-width: 1100px;
+        margin: auto;
         background-color: #f6fbf9;
-        padding: 2rem 4rem 4rem 4rem;
+        padding: 2rem 3rem 3rem 3rem;
+        border-radius: 16px;
+        box-shadow: 0px 0px 10px rgba(0, 100, 80, 0.05);
     }
     html, body, [class*="css"] {
         font-family: 'Segoe UI', sans-serif;
     }
     .custom-header {
-        font-size: 2.2rem;
+        font-size: 2.1rem;
         font-weight: 700;
         color: #1b4332;
-        margin-bottom: 0.8rem;
+        margin-bottom: 0.3rem;
         text-align: center;
     }
     .custom-sub {
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         color: #4b4b4b;
         text-align: center;
-        margin-bottom: 2.5rem;
+        margin-bottom: 2rem;
     }
     .section-title {
-        font-size: 1.4rem;
+        font-size: 1.3rem;
         font-weight: 600;
-        margin-top: 2rem;
+        margin-top: 1.5rem;
         margin-bottom: 1rem;
-        color: #40916c;
+        color: #2d6a4f;
     }
     .stButton>button {
         background-color: #52b788;
         color: white;
         font-weight: 600;
         font-size: 1rem;
-        border-radius: 10px;
-        padding: 0.6rem 1.2rem;
-        margin-top: 1.5rem;
+        border-radius: 8px;
+        padding: 0.5rem 1.1rem;
+        transition: all 0.2s ease-in-out;
+    }
+    .stButton>button:hover {
+        background-color: #40916c;
     }
     .stDownloadButton>button {
         background-color: white;
         color: #333;
         border: 1px solid #ccc;
         border-radius: 8px;
-        padding: 0.5rem 1rem;
-        margin-top: 1rem;
+        padding: 0.45rem 1rem;
+        margin-top: 0.8rem;
+    }
+    .stDownloadButton>button:hover {
+        background-color: #f0fdf4;
+        border-color: #a3d9c8;
     }
     .stSuccess {
         background-color: #d8f3dc;
         color: #1b4332;
-        padding: 1rem;
+        padding: 0.9rem;
         border-radius: 8px;
         font-weight: 500;
-        font-size: 1.2rem;
-        margin-top: 1.5rem;
+        font-size: 1.1rem;
+        margin-top: 1.2rem;
         text-align: center;
     }
     </style>
@@ -78,11 +89,11 @@ def load_model():
 model = load_model()
 
 # 🎯 页面标题
-st.markdown('<div class="custom-header">🌱 Methylene Blue Adsorption Prediction</div>', unsafe_allow_html=True)
+st.markdown('<div class="custom-header">🌿 Methylene Blue Adsorption Prediction</div>', unsafe_allow_html=True)
 st.markdown('<div class="custom-sub">Estimate the adsorption capacity (Q, mmol/g) of hydrothermal carbon based on synthesis, material properties, and adsorption environment.</div>', unsafe_allow_html=True)
 
-# 横向布局
-col1, col2, col3 = st.columns([1, 1, 1])
+# 🎛 三列输入（A4横向布局）
+col1, col2, col3 = st.columns([1.05, 1.05, 1.05], gap="large")
 
 with col1:
     st.markdown('<div class="section-title">🧪 Synthesis Conditions</div>', unsafe_allow_html=True)
@@ -106,13 +117,13 @@ with col3:
     T = st.number_input("Adsorption Temperature (°C)", min_value=10.0, max_value=60.0, value=25.0, step=1.0)
     C0 = st.number_input("Initial Dye/Adsorbent Ratio (mg/g)", min_value=0.1, max_value=500.0, value=100.0, step=1.0)
 
-# 🧠 预测与显示结果
+# ⏱ 预测与结果展示
 prediction = None
 df_result = None
 
-col_pred1, col_pred2 = st.columns([2, 1])
+col_btn, col_download = st.columns([1.5, 1])
 
-with col_pred1:
+with col_btn:
     if st.button("🔍 Predict Adsorption Capacity"):
         input_array = np.array([[T_H, time, ratio, modified_val, C, ONC, HC, OC, BET, pH, T, C0]])
         prediction = model.predict(input_array)[0]
@@ -124,7 +135,7 @@ with col_pred1:
             "pH": pH, "T (°C)": T, "C₀ (mg/g)": C0, "Predicted Q (mmol/g)": round(prediction, 3)
         }])
 
-with col_pred2:
+with col_download:
     if prediction is not None and df_result is not None:
         towrite = BytesIO()
         df_result.to_csv(towrite, index=False)
