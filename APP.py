@@ -4,32 +4,34 @@ import pandas as pd
 import joblib
 from io import BytesIO
 
-# 页面配置：居中显示、模拟A4横向布局
+# 页面配置
 st.set_page_config(
     page_title="Methylene Blue Adsorption Predictor",
     layout="centered"
 )
 
-# 🌿 自定义样式优化
+# 🌿 自定义样式美化
 st.markdown("""
     <style>
     .stApp {
         max-width: 1100px;
         margin: auto;
         background-color: #f6fbf9;
-        padding: 2rem 3rem 3rem 3rem;
-        border-radius: 16px;
-        box-shadow: 0px 0px 10px rgba(0, 100, 80, 0.05);
+        padding: 2.5rem 3rem 3.5rem 3rem;
+        border-radius: 18px;
+        box-shadow: 0px 0px 12px rgba(0, 100, 80, 0.06);
     }
     html, body, [class*="css"] {
         font-family: 'Segoe UI', sans-serif;
     }
+
+    /* 标题区域 */
     .custom-header {
-        font-size: 2.1rem;
+        font-size: 2.0rem;
         font-weight: 700;
         color: #1b4332;
-        margin-bottom: 0.3rem;
         text-align: center;
+        margin-bottom: 0.3rem;
     }
     .custom-sub {
         font-size: 1.1rem;
@@ -37,6 +39,8 @@ st.markdown("""
         text-align: center;
         margin-bottom: 2rem;
     }
+
+    /* 分区小标题 */
     .section-title {
         font-size: 1.3rem;
         font-weight: 600;
@@ -44,44 +48,55 @@ st.markdown("""
         margin-bottom: 1rem;
         color: #2d6a4f;
     }
+
+    /* 输入框统一美化 */
+    input[type="number"] {
+        border-radius: 6px !important;
+        height: 38px !important;
+        font-size: 0.95rem !important;
+    }
+
+    /* 按钮样式 */
+    .stButton>button, .stDownloadButton>button {
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        padding: 0.55rem 1.2rem;
+    }
     .stButton>button {
         background-color: #52b788;
         color: white;
-        font-weight: 600;
-        font-size: 1rem;
-        border-radius: 8px;
-        padding: 0.5rem 1.1rem;
-        transition: all 0.2s ease-in-out;
+        border: none;
     }
     .stButton>button:hover {
         background-color: #40916c;
     }
     .stDownloadButton>button {
-        background-color: white;
+        background-color: #ffffff;
         color: #333;
         border: 1px solid #ccc;
-        border-radius: 8px;
-        padding: 0.45rem 1rem;
-        margin-top: 0.8rem;
     }
     .stDownloadButton>button:hover {
-        background-color: #f0fdf4;
-        border-color: #a3d9c8;
+        background-color: #eef7f2;
+        border-color: #88cbb3;
     }
+
+    /* 成功预测结果样式 */
     .stSuccess {
         background-color: #d8f3dc;
-        color: #1b4332;
-        padding: 0.9rem;
+        color: #065f46;
+        padding: 1rem;
+        border-left: 6px solid #40916c;
         border-radius: 8px;
-        font-weight: 500;
-        font-size: 1.1rem;
-        margin-top: 1.2rem;
+        font-weight: 600;
+        font-size: 1.15rem;
+        margin-top: 1.5rem;
         text-align: center;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# ✅ 加载处理好的 pipeline 模型
+# ✅ 加载模型
 @st.cache_resource
 def load_model():
     return joblib.load("HGB_clean.pkl")
@@ -92,7 +107,7 @@ model = load_model()
 st.markdown('<div class="custom-header">🌿 Methylene Blue Adsorption Prediction</div>', unsafe_allow_html=True)
 st.markdown('<div class="custom-sub">Estimate the adsorption capacity (Q, mmol/g) of hydrothermal carbon based on synthesis, material properties, and adsorption environment.</div>', unsafe_allow_html=True)
 
-# 🎛 三列输入（A4横向布局）
+# 🎛 三列输入区域
 col1, col2, col3 = st.columns([1.05, 1.05, 1.05], gap="large")
 
 with col1:
@@ -117,7 +132,7 @@ with col3:
     T = st.number_input("Adsorption Temperature (°C)", min_value=10.0, max_value=60.0, value=25.0, step=1.0)
     C0 = st.number_input("Initial Dye/Adsorbent Ratio (mg/g)", min_value=0.1, max_value=500.0, value=100.0, step=1.0)
 
-# ⏱ 预测与结果展示
+# 🔍 预测与下载区域
 prediction = None
 df_result = None
 
@@ -147,4 +162,5 @@ with col_download:
             file_name="MB_Adsorption_Prediction.csv",
             mime="text/csv"
         )
+
 
